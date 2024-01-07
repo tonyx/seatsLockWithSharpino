@@ -19,7 +19,7 @@ Not yet (it will show the "undo" feature of commands to do rollback commands on 
 
 ## Installation
 
-Just clone the project and run the tests (dotnet run tests)
+Just clone the project and run the tests (dotnet test)
 
 ## More info:
 [Sharpino (event sourcing library used in this example)](https://github.com/tonyx/Sharpino)
