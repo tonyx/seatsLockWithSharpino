@@ -3,6 +3,9 @@ module Tests
 open seatsLockWithSharpino.Row1Context
 open seatsLockWithSharpino.Seats
 open seatsLockWithSharpino
+open seatsLockWithSharpino.Row
+open seatsLockWithSharpino.Row1
+open seatsLockWithSharpino.Row2
 open FsToolkit.ErrorHandling
 open Expecto
 open Sharpino
@@ -15,25 +18,27 @@ open Sharpino.Cache
 let tests =
     testList "singleRows tests" [
         testCase "all seats of the first row are free - Ok" <| fun _ ->
-            let currentSeats = Row1.Zero.Row1Seats
-            Expect.equal currentSeats.Length 5 "should be equal"
+            let currentSeats = Row1.Zero
+            let availableSeats = currentSeats.GetAvailableSeats()
+            Expect.equal availableSeats.Length 5 "should be equal"
 
         testCase "book a single seat from the first row - Ok" <| fun _ ->
             let booking = { id = 1; seats = [1] }
             let row1WithOneSeatBooked = Row1.Zero.ReserveSeats booking |> Result.get
-            Expect.equal (row1WithOneSeatBooked.Row1Seats |> List.head).State SeatState.Reserved "should be equal"
-
-        testCase "book a single seats from the second row - Ok" <| fun _ ->
-            let booking = { id = 2; seats = [6] }
-            let row2WithOneSeatBooked = Row2Context.Row2.Zero.ReserveSeats booking |> Result.get
-            Expect.equal (row2WithOneSeatBooked.Row2Seats |> List.head).State SeatState.Reserved "should be equal"
-            let availableSeats = row2WithOneSeatBooked.GetAvailableSeats()
+            let availableSeats = row1WithOneSeatBooked.GetAvailableSeats()
             Expect.equal availableSeats.Length 4 "should be equal"
+
+        testCase "book a single seat from the second row - Ok" <| fun _ ->
+            let booking = { id = 2; seats = [6] }
+            let row2Context = RowContext(row2Seats)
+            let row2WithOneSeatBooked = row2Context.ReserveSeats booking |> Result.get
+            let availables = row2WithOneSeatBooked.GetAvailableSeats()
+            Expect.equal availables.Length 4 "should be equal"
 
         testCase "book a seat that is already booked - Error" <| fun _ ->
             let booking = { id = 1; seats = [1] }
             let row1WithOneSeatBooked = Row1.Zero.ReserveSeats booking |> Result.get
-            Expect.equal (row1WithOneSeatBooked.Row1Seats |> List.head).State SeatState.Reserved "should be equal"
+            Expect.isFalse (row1WithOneSeatBooked.IsAvailable 1) "should be equal"
             let newBooking = { id = 1; seats = [1] }
             let reservedSeats' = row1WithOneSeatBooked.ReserveSeats newBooking 
             Expect.isError reservedSeats' "should be equal"
@@ -41,9 +46,8 @@ let tests =
         testCase "book five seats - Ok" <| fun _ ->
             let booking = { id = 1; seats = [1;2;3;4;5] }
             let row1FullyBooked = Row1.Zero.ReserveSeats booking |> Result.get
-            Expect.equal (row1FullyBooked.Row1Seats |> List.head).State SeatState.Reserved "should be equal"
-            let firstFiveSeats = row1FullyBooked.Row1Seats |> List.take 5
-            Expect.isTrue (firstFiveSeats |> List.forall (fun seat -> seat.State = SeatState.Reserved)) "should be equal"
+            let availableSeats = row1FullyBooked.GetAvailableSeats()    
+            Expect.equal availableSeats.Length 0 "should be equal"
     ]
     |> 
     testSequenced

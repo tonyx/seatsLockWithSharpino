@@ -3,14 +3,15 @@ namespace seatsLockWithSharpino
 open FsToolkit.ErrorHandling
 open Sharpino.Utils
 open Row2
+open Row
 
 // I call it context but it works as an aggregate. Need to fix it in library, docs ...
 module Row2Context =
     open System
-    type Row2 =
-        { Row2Seats: Seats.Seat list }
+    type Row2(rowContext: RowContext) =
+
         static member Zero =
-            { Row2Seats = row2Seats }
+            Row2(RowContext(row2Seats))
 
         static member StorageName =
             "_row2"
@@ -22,40 +23,16 @@ module Row2Context =
             new Object()
 
         member this.IsAvailable (seatId: Seats.Id) =
-            this.Row2Seats
-            |> List.filter (fun seat -> seat.id = seatId)
-            |> List.exists (fun seat -> seat.State = Seats.SeatState.Available) 
+            rowContext.IsAvailable seatId
+
         member this.ReserveSeats (booking: Seats.Booking) =
             result {
-                let seats = this.Row2Seats
-                let! check = 
-                    let seatsInvolved =
-                        seats
-                        |> List.filter (fun seat -> booking.seats |> List.contains seat.id)
-                    seatsInvolved
-                        |> List.forall (fun seat -> seat.State = Seats.SeatState.Available)
-                        |> boolToResult "Seat already booked"
-                    
-                let reservedSeats = 
-                    seats
-                    |> List.filter (fun seat -> booking.seats |> List.contains seat.id)
-                    |> List.map (fun seat -> { seat with State = Seats.SeatState.Reserved })
-
-                let freeSeats = 
-                    seats
-                    |> List.filter (fun seat -> not (booking.seats |> List.contains seat.id))
-                    |> List.map (fun seat -> { seat with State = Seats.SeatState.Available })
-                return 
-                    {
-                        this with
-                            Row2Seats = reservedSeats @ freeSeats |> List.sort
-                    }
+                let! rowContext' = rowContext.ReserveSeats booking
+                return Row2(rowContext')
             }
 
         member this.GetAvailableSeats () =
-            this.Row2Seats
-            |> List.filter (fun seat -> seat.State = Seats.SeatState.Available)
-            |> List.map (fun seat -> seat.id)
+            rowContext.GetAvailableSeats ()
         member this.Serialize(serializer: ISerializer) =
             this
             |> serializer.Serialize
