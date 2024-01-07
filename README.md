@@ -1,5 +1,5 @@
-# Example of seat bookings in multiple rows in event sourcing
-Example of approaching the problem of booking seats among multiple rows in an event-sourcing way.
+# Example of seat bookings in event sourcing
+Booking seats among multiple rows (where those rows are aggregates) in an event-sourcing way.
 
 ## Description
 
