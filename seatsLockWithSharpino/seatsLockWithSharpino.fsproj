@@ -16,7 +16,6 @@
     <Compile Include="Domain/Row2/Events.fs" />
     <Compile Include="Domain/Row2/Commands.fs" />
     <Compile Include="App.fs" />
-    <!-- <Compile Include="Library.fs" /> -->
   </ItemGroup>
 
   <ItemGroup>
