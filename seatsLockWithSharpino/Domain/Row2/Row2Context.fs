@@ -50,7 +50,7 @@ module Row2Context =
                         this with
                             Row2Seats = reservedSeats @ freeSeats |> List.sort
                     }
-           }
+            }
 
         member this.GetAvailableSeats () =
             this.Row2Seats

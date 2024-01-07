@@ -1,26 +1,7 @@
 
 namespace seatsLockWithSharpino 
 open FsToolkit.ErrorHandling
-open Sharpino
-open Sharpino.Core
-open Sharpino.Utils
 open Sharpino.CommandHandler
-open Sharpino.StateView
-open Sharpino.Definitions
-open Sharpino.Utils
-open Sharpino.Core
-open Sharpino.Definitions
-open Sharpino.Utils
-open Sharpino.CommandHandler
-open seatsLockWithSharpino.Row1Events
-open Sharpino
-open Sharpino.Core
-open Sharpino.Utils
-open Sharpino.CommandHandler
-open Sharpino.StateView
-open Sharpino.Definitions
-open Row1
-open Row2
 
 module App =
     open Sharpino.Storage

@@ -1,11 +1,8 @@
 
 namespace seatsLockWithSharpino 
-open FsToolkit.ErrorHandling
 open Sharpino.Utils
 open Sharpino.Core
 open Sharpino.Definitions
-open Sharpino.Utils
-open Row2
 
 module Row2Events =
     type Row2Events =
