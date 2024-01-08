@@ -42,13 +42,13 @@ module Row =
                 // it just checks that the middle one can't be free, but
                 // actually it was supposed to be "no single seat left" anywhere A.F.A.I.K.
                 let theSeatInTheMiddleCantRemainFreeIfAllTheOtherAreClaimed =
-                    let rowAsArray = potentialNewRowState |> Array.ofList
-                    ((rowAsArray.[0].State = Seats.SeatState.Reserved &&
-                    rowAsArray.[1].State = Seats.SeatState.Reserved &&
-                    rowAsArray.[2].State = Seats.SeatState.Available &&
-                    rowAsArray.[3].State = Seats.SeatState.Reserved &&
-                    rowAsArray.[4].State = Seats.SeatState.Reserved))
-                    |> not |> boolToResult "error: can't leave a single seat free"
+                    (potentialNewRowState.[0].State = Seats.SeatState.Reserved &&
+                    potentialNewRowState.[1].State = Seats.SeatState.Reserved &&
+                    potentialNewRowState.[2].State = Seats.SeatState.Available &&
+                    potentialNewRowState.[3].State = Seats.SeatState.Reserved &&
+                    potentialNewRowState.[4].State = Seats.SeatState.Reserved)
+                    |> not
+                    |> boolToResult "error: can't leave a single seat free"
                 let! checkInvariant = theSeatInTheMiddleCantRemainFreeIfAllTheOtherAreClaimed
                 return
                     RowContext (potentialNewRowState)
