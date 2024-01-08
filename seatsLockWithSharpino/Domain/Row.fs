@@ -39,6 +39,7 @@ module Row =
                     reservedSeats @ freeSeats
                     |> List.sortBy (fun seat -> seat.id)
                 
+                // actually it was supposed to be "no single seat left" (not only the middle one)
                 let checkMiddleMustNotLeftAsFreeInvariant =
                     let rowAsArray = potentialNewRowState |> Array.ofList
                     ((rowAsArray.[0].State = Seats.SeatState.Reserved &&
