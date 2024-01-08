@@ -15,7 +15,6 @@ open Sharpino.Storage
 open Sharpino.Cache
 open Sharpino.Core
 
-
 [<Tests>]
 let hackingEventInStorageTest =
     let serializer = new Utils.JsonSerializer(Utils.serSettings) :> Utils.ISerializer
@@ -29,8 +28,7 @@ let hackingEventInStorageTest =
             Expect.equal availableSeats.Length 10 "should be equal"
             let seatOneBooking = { id = 1; seats = [1] }
             let bookingEvent = Row1Events.SeatsReserved seatOneBooking
-            let serializedEvent = bookingEvent |> serializer.Serialize
-            // let serializedEvent = bookingEvent.Serialize(serializer) // |> serializer.Serialize
+            let serializedEvent = bookingEvent.Serialize serializer
             (storage :> IEventStore).AddEvents Row1Context.Row1.Version Row1Context.Row1.StorageName [serializedEvent]
             let availableSeats = app.GetAllAvailableSeats() |> Result.get
             Expect.equal availableSeats.Length 9 "should be equal"
@@ -46,11 +44,11 @@ let hackingEventInStorageTest =
             let invalidBookingViolatesInvariant = { id = 1; seats = [1; 2; 4; 5] }
             
             let bookingEvent = Row1Events.SeatsReserved invalidBookingViolatesInvariant
-            let serializedEvent = bookingEvent |> serializer.Serialize
+            // let serializedEvent = bookingEvent |> serializer.Serialize
+            let serializedEvent = bookingEvent.Serialize serializer 
             (storage :> IEventStore).AddEvents Row1Context.Row1.Version Row1Context.Row1.StorageName [serializedEvent]
             let availableSeats = app.GetAllAvailableSeats() |> Result.get
             Expect.equal availableSeats.Length 10 "should be equal"
-            
             
         // this example simulates when one event that is not supposed to be added is added anyway because is processed
         // in parallel 
@@ -65,8 +63,8 @@ let hackingEventInStorageTest =
             let firstBookingOfFirstTwoSeats =  { id = 1; seats = [1; 2] }
             let secondBookingOfLastTwoSeats = { id = 2; seats = [4; 5] }
             
-            let booking1 = Row1Events.SeatsReserved firstBookingOfFirstTwoSeats |> serializer.Serialize
-            let booking2 = Row1Events.SeatsReserved secondBookingOfLastTwoSeats |> serializer.Serialize
+            let booking1 = (Row1Events.SeatsReserved firstBookingOfFirstTwoSeats).Serialize  serializer
+            let booking2 = (Row1Events.SeatsReserved secondBookingOfLastTwoSeats).Serialize serializer
             
             (storage :> IEventStore).AddEvents Row1Context.Row1.Version Row1Context.Row1.StorageName [booking1; booking2]
             let availableSeats = app.GetAllAvailableSeats() |> Result.get
