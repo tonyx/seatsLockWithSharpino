@@ -1,8 +1,9 @@
 
 namespace seatsLockWithSharpino
-open FsToolkit.ErrorHandling
+open seatsLockWithSharpino.Seats
 open Sharpino.Utils
 open Sharpino
+open FsToolkit.ErrorHandling
 
 module Row =
     let serializer = new Utils.JsonSerializer(Utils.serSettings) :> Utils.ISerializer
@@ -25,30 +26,30 @@ module Row =
                         |> List.forall (fun seat -> seat.State = Seats.SeatState.Available)
                         |> boolToResult "Seat already booked"
                 
-                let reservedSeats = 
+                let claimedSeats = 
                     seats
                     |> List.filter (fun seat -> booking.seats |> List.contains seat.id)
                     |> List.map (fun seat -> { seat with State = Seats.SeatState.Reserved })
 
-                let freeSeats = 
+                let unclaimedSeats = 
                     seats
                     |> List.filter (fun seat -> not (booking.seats |> List.contains seat.id))
-                    |> List.map (fun seat -> { seat with State = Seats.SeatState.Available })
 
                 let potentialNewRowState = 
-                    reservedSeats @ freeSeats
+                    claimedSeats @ unclaimedSeats
                     |> List.sortBy (fun seat -> seat.id)
                 
-                // actually it was supposed to be "no single seat left" (not only the middle one)
-                let checkMiddleMustNotLeftAsFreeInvariant =
+                // it just checks that the middle one can't be free, but
+                // actually it was supposed to be "no single seat left" anywhere A.F.A.I.K.
+                let theSeatInTheMiddleCantRemainFreeIfAllTheOtherAreClaimed =
                     let rowAsArray = potentialNewRowState |> Array.ofList
                     ((rowAsArray.[0].State = Seats.SeatState.Reserved &&
                     rowAsArray.[1].State = Seats.SeatState.Reserved &&
                     rowAsArray.[2].State = Seats.SeatState.Available &&
                     rowAsArray.[3].State = Seats.SeatState.Reserved &&
                     rowAsArray.[4].State = Seats.SeatState.Reserved))
-                    |> not |> boolToResult "error"
-                let! checkInvariant = checkMiddleMustNotLeftAsFreeInvariant
+                    |> not |> boolToResult "error: can't leave a single seat free"
+                let! checkInvariant = theSeatInTheMiddleCantRemainFreeIfAllTheOtherAreClaimed
                 return
                     RowContext (potentialNewRowState)
             }
@@ -56,7 +57,7 @@ module Row =
         member this.GetAvailableSeats () =
             this.RowSeats
             |> List.filter (fun seat -> seat.State = Seats.SeatState.Available)
-            |> List.map (fun seat -> seat.id)
+            |> List.map (_.id)
 
         member this.Serialize(serializer: ISerializer) =
             this
