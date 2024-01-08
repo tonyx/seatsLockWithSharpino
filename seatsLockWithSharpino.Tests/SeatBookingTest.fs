@@ -14,13 +14,79 @@ open seatsLockWithSharpino.App
 open Sharpino.Storage
 open Sharpino.Cache
 
+
+[<Tests>]
+let hackingEventInStorageTest =
+    let serializer = new Utils.JsonSerializer(Utils.serSettings) :> Utils.ISerializer
+    testList "hacks the events in the storage to make sure that invalid events will be skipped, and concurrency cannot end up in invariant rule violation " [
+        testCase "add a booking event in the storage and show the result by the app - Ok" <| fun _ ->
+            let storage = MemoryStorage()
+            let app = App(storage)
+            let availableSeats = app.GetAllAvailableSeats() |> Result.get
+            Expect.equal availableSeats.Length 10 "should be equal"
+            let seatOneBooking = { id = 1; seats = [1] }
+            let bookingEvent = Row1Events.SeatsReserved seatOneBooking
+            let serializedEvent = bookingEvent |> serializer.Serialize
+            (storage :> IEventStore).AddEvents Row1Context.Row1.Version Row1Context.Row1.StorageName [serializedEvent]
+            let availableSeats = app.GetAllAvailableSeats() |> Result.get
+            Expect.equal availableSeats.Length 9 "should be equal"
+        
+        testCase "try add a single event that violates the middle row seat invariant rule - Ok" <| fun _ ->
+            let storage = MemoryStorage()
+            let app = App(storage)
+            let availableSeats = app.GetAllAvailableSeats() |> Result.get
+            Expect.equal availableSeats.Length 10 "should be equal"
+            
+            let invalidBookingViolatesInvariant = { id = 1; seats = [1; 2; 4; 5] }
+            
+            let bookingEvent = Row1Events.SeatsReserved invalidBookingViolatesInvariant
+            let serializedEvent = bookingEvent |> serializer.Serialize
+            (storage :> IEventStore).AddEvents Row1Context.Row1.Version Row1Context.Row1.StorageName [serializedEvent]
+            let availableSeats = app.GetAllAvailableSeats() |> Result.get
+            Expect.equal availableSeats.Length 10 "should be equal"
+            
+            
+        // this example simulates when one event that is not supposed to be added is added anyway because is processed
+        // in parallel 
+        testCase "try add two events where one of those violates the middle chair invariant rule. Only one of those can be processed even if they are both actually stored - Ok" <| fun _ ->
+            let storage = MemoryStorage()
+            let app = App(storage)
+            let availableSeats = app.GetAllAvailableSeats() |> Result.get
+            Expect.equal availableSeats.Length 10 "should be equal"
+            
+            let firstBookingOfFirstTwoSeats =  { id = 1; seats = [1; 2] }
+            let secondBookingOfLastTwoSeats = { id = 2; seats = [4; 5] }
+            
+            let booking1 = Row1Events.SeatsReserved firstBookingOfFirstTwoSeats |> serializer.Serialize
+            let booking2 = Row1Events.SeatsReserved secondBookingOfLastTwoSeats |> serializer.Serialize
+            
+            (storage :> IEventStore).AddEvents Row1Context.Row1.Version Row1Context.Row1.StorageName [booking1; booking2]
+            let availableSeats = app.GetAllAvailableSeats() |> Result.get
+            Expect.equal availableSeats.Length 8 "should be equal"
+            
+    ]
+    |> testSequenced
+    
 [<Tests>]
 let tests =
     testList "singleRows tests" [
+
         testCase "all seats of the first row are free - Ok" <| fun _ ->
             let currentSeats = Row1.Zero
             let availableSeats = currentSeats.GetAvailableSeats()
             Expect.equal availableSeats.Length 5 "should be equal"
+
+        testCase "cannot leave the only central 3 seat free - Error" <| fun _ ->
+            let currentSeats = Row1.Zero
+            let booking = { id = 1; seats = [1; 2; 4; 5] }
+            let reservedSeats = currentSeats.ReserveSeats booking
+            Expect.isError reservedSeats "should be equal"
+            
+        testCase "can leave the two central seats 2 and 3 free - Error" <| fun _ ->
+            let currentSeats = Row1.Zero
+            let booking = { id = 1; seats = [1; 4; 5] }
+            let reservedSeats = currentSeats.ReserveSeats booking
+            Expect.isOk reservedSeats "should be equal"
 
         testCase "book a single seat from the first row - Ok" <| fun _ ->
             let booking = { id = 1; seats = [1] }
@@ -51,6 +117,8 @@ let tests =
     ]
     |> 
     testSequenced
+
+
 
 [<Tests>]
 let apiTests =
@@ -179,7 +247,7 @@ let apiTests =
             let booked2 = app.BookSeats booking2
             Expect.isError booked2 "should be equal"
 
-        ftestCase "reserve places related to already booked only in the second row and so no place is booked at all - Error" <| fun _ ->
+        testCase "reserve places related to already booked only in the second row and so no place is booked at all - Error" <| fun _ ->
             let storage = MemoryStorage()
             StateCache<Row1>.Instance.Clear()
             StateCache<Row2Context.Row2>.Instance.Clear()

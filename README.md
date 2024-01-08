@@ -1,7 +1,7 @@
 # Example of seat bookings in event sourcing
 Booking seats among multiple rows (where those rows are aggregates) in an event-sourcing way.
 
-## Description
+## Problem 1
 
 I have two rows of seats related to two different streams of events. Each row has 5 seats. I want to book a seat in row 1 and a seat in row 2. I want to do this in a single transaction so that if just one of the claimed seats is already booked then the entire multiple-row transaction fails and no seats are booked at all.
 ### Questions: 
@@ -15,6 +15,19 @@ Not yet.
 No.
 4) Is EventStoreDb integration included in this example?
 Not yet (it will show the "undo" feature of commands to do rollback commands on multiple streams of events).
+
+## Problem 2
+There is an invariant rule that says that no booking can end up in leaving the only middle seat free in a row. 
+This invariant rule must be preserved even if two concurrent transaction that are not aware of each other 
+try to book the two left seats and the two right seats independently.
+
+### Questions:
+1) can you just use a lock on any row to solve this problem?
+Answer: yes by setting PessimisticLocking to true in appSettings.json that will force single-threaded execution of any command involving the same "aggregate" 
+2) can you solve this problem without using locks?
+Answer: yes. if I set PessimisticLocking to false then parallel command processing is allowed and invalid events can be stored in the eventstore. However they will be skipped by the "evolve" function anyway.
+3) Where are more info about how to test this behavior?
+Answer: See the testList called hackingEventInStorageTest. It will simply add invalid events and who that the current state is not affected by them.
 
 
 ## Installation
