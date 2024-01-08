@@ -27,7 +27,8 @@ Answer: yes by setting PessimisticLocking to true in appSettings.json that will 
 2) can you solve this problem without using locks?
 Answer: yes. if I set PessimisticLocking to false then parallel command processing is allowed and invalid events can be stored in the eventstore. However they will be skipped by the "evolve" function anyway.
 3) Where are more info about how to test this behavior?
-Answer: See the testList called hackingEventInStorageTest. It will simply add invalid events and who that the current state is not affected by them.
+Answer: See the testList called hackingEventInStorageTest. 
+It will simply add invalid events and show that the current state is not affected by them.
 
 
 ## Installation
