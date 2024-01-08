@@ -22,18 +22,23 @@ let hackingEventInStorageTest =
     testList "hacks the events in the storage to make sure that invalid events will be skipped, and concurrency cannot end up in invariant rule violation " [
         testCase "add a booking event in the storage and show the result by the app - Ok" <| fun _ ->
             let storage = MemoryStorage()
+            StateCache<Row1>.Instance.Clear()
+            StateCache<Row2Context.Row2>.Instance.Clear()
             let app = App(storage)
             let availableSeats = app.GetAllAvailableSeats() |> Result.get
             Expect.equal availableSeats.Length 10 "should be equal"
             let seatOneBooking = { id = 1; seats = [1] }
             let bookingEvent = Row1Events.SeatsReserved seatOneBooking
             let serializedEvent = bookingEvent |> serializer.Serialize
+            // let serializedEvent = bookingEvent.Serialize(serializer) // |> serializer.Serialize
             (storage :> IEventStore).AddEvents Row1Context.Row1.Version Row1Context.Row1.StorageName [serializedEvent]
             let availableSeats = app.GetAllAvailableSeats() |> Result.get
             Expect.equal availableSeats.Length 9 "should be equal"
         
         testCase "try add a single event that violates the middle row seat invariant rule - Ok" <| fun _ ->
             let storage = MemoryStorage()
+            StateCache<Row1>.Instance.Clear()
+            StateCache<Row2Context.Row2>.Instance.Clear()
             let app = App(storage)
             let availableSeats = app.GetAllAvailableSeats() |> Result.get
             Expect.equal availableSeats.Length 10 "should be equal"
@@ -51,6 +56,8 @@ let hackingEventInStorageTest =
         // in parallel 
         testCase "try add two events where one of those violates the middle chair invariant rule. Only one of those can be processed even if they are both actually stored - Ok" <| fun _ ->
             let storage = MemoryStorage()
+            StateCache<Row1>.Instance.Clear()
+            StateCache<Row2Context.Row2>.Instance.Clear()
             let app = App(storage)
             let availableSeats = app.GetAllAvailableSeats() |> Result.get
             Expect.equal availableSeats.Length 10 "should be equal"
