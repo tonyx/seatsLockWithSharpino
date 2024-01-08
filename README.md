@@ -19,8 +19,7 @@ Not yet (it will show the "undo" feature of commands to do rollback commands on 
 
 ## Problem 2
 There is an invariant rule that says that no booking can end up in leaving the only middle seat free in a row. 
-This invariant rule must be preserved even if two concurrent transactions  
-try to book the two left seats and the two right seats independently.
+This invariant rule must be preserved even if two concurrent transactions try to book the two left seats and the two right seats independently so violating (together) this invariant.
 
 ### Questions:
 1) can you just use a lock on any row to solve this problem?
