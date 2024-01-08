@@ -1,5 +1,6 @@
 # Example of seat bookings in event sourcing
-Booking seats among multiple rows (where those rows are aggregates) in an event-sourcing way.
+1. Booking seats among multiple rows (where those rows are aggregates) in an event-sourcing way.
+2. Booking seats in a single row by two concurrent commands that singularly do not violate any invariant rule and yet the final state is potentially invalid.
 
 ## Problem 1
 

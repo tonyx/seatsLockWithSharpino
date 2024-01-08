@@ -13,6 +13,7 @@ open Sharpino.MemoryStorage
 open seatsLockWithSharpino.App
 open Sharpino.Storage
 open Sharpino.Cache
+open Sharpino.Core
 
 
 [<Tests>]
