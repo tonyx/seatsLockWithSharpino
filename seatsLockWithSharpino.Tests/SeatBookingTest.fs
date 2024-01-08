@@ -149,9 +149,11 @@ let apiTests =
             StateCache<Row2Context.Row2>.Instance.Clear()
 
             let app = new App(storage)
+            let booking = { id = 1; seats = [1;2;3;4;5] }
             let booking1 = { id = 1; seats = [1;2;3;4;5] }
             let booking2 = { id = 2; seats = [] }
-            let booked = app.BookSeatsTwoRows booking1 booking2 
+            let booked = app.BookSeats booking
+            // let booked = app.BookSeatsTwoRows booking1 booking2 
             Expect.isOk booked "should be equal"
 
         testCase "book all seats on row1 - Ok" <| fun _ ->

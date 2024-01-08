@@ -17,20 +17,13 @@ module App =
             getStorageFreshStateViewer<Row2Context.Row2, Row2Events.Row2Events > storage
         new(storage: IEventStore) = App(storage, doNothingBroker)
 
-        member this.BookSeatsTwoRows (bookingRow1: Seats.Booking) (bookingRow2: Seats.Booking) =
-            result {
-                let reserveCommandRow1 = Row1Command.ReserveSeats bookingRow1
-                let reserveCommandRow2 = Row2Command.ReserveSeats bookingRow2
-                let! result = runTwoCommands<Row1Context.Row1, Row2Context.Row2, Row1Events.Row1Events, Row2Events.Row2Events> storage eventBroker reserveCommandRow1 reserveCommandRow2 row1StateViewer row2StateViewer
-                return result
-            }
-        member this.BookSeatsRow1 (bookingRow1: Seats.Booking) =
+        member private this.BookSeatsRow1 (bookingRow1: Seats.Booking) =
             result {
                 let reserveCommandRow1 = Row1Command.ReserveSeats bookingRow1
                 let! result = runCommand<Row1Context.Row1, Row1Events.Row1Events> storage eventBroker row1StateViewer reserveCommandRow1 
                 return result
             }
-        member this.BookSeatsRow2 (bookingRow2: Seats.Booking) =
+        member private this.BookSeatsRow2 (bookingRow2: Seats.Booking) =
             result {
                 let reserveCommandRow2 = Row2Command.ReserveSeats bookingRow2
                 let! result = runCommand<Row2Context.Row2, Row2Events.Row2Events> storage eventBroker row2StateViewer reserveCommandRow2
