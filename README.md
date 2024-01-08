@@ -30,6 +30,10 @@ Answer: yes. if I set PessimisticLocking to false then parallel command processi
 3) Where are more info about how to test this behavior?
 Answer: See the testList called hackingEventInStorageTest. 
 It will simply add invalid events and show that the current state is not affected by them.
+4) You also need to give timely feedback to the user. How can you achieve that if you satisfy invariants by skipping the events?
+Answer: you can't. The user may need to do some refresh or wait a confirmation (open a link that is not immediately generated). There is no immediate consistency in this case.
+ 
+  
 
 
 ## Installation
