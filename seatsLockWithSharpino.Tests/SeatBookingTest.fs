@@ -27,7 +27,7 @@ let hackingEventInStorageTest =
             let availableSeats = app.GetAllAvailableSeats() |> Result.get
             Expect.equal availableSeats.Length 10 "should be equal"
             let seatOneBooking = { id = 1; seats = [1] }
-            let bookingEvent = Row1Events.SeatsReserved seatOneBooking
+            let bookingEvent = Row1Events.SeatsBooked seatOneBooking
             let serializedEvent = bookingEvent.Serialize serializer
             (storage :> IEventStore).AddEvents Row1Context.Row1.Version Row1Context.Row1.StorageName [serializedEvent]
             let availableSeats = app.GetAllAvailableSeats() |> Result.get
@@ -43,7 +43,7 @@ let hackingEventInStorageTest =
             
             let invalidBookingViolatesInvariant = { id = 1; seats = [1; 2; 4; 5] }
             
-            let bookingEvent = Row1Events.SeatsReserved invalidBookingViolatesInvariant
+            let bookingEvent = Row1Events.SeatsBooked invalidBookingViolatesInvariant
             // let serializedEvent = bookingEvent |> serializer.Serialize
             let serializedEvent = bookingEvent.Serialize serializer 
             (storage :> IEventStore).AddEvents Row1Context.Row1.Version Row1Context.Row1.StorageName [serializedEvent]
@@ -63,8 +63,8 @@ let hackingEventInStorageTest =
             let firstBookingOfFirstTwoSeats =  { id = 1; seats = [1; 2] }
             let secondBookingOfLastTwoSeats = { id = 2; seats = [4; 5] }
             
-            let booking1 = (Row1Events.SeatsReserved firstBookingOfFirstTwoSeats).Serialize  serializer
-            let booking2 = (Row1Events.SeatsReserved secondBookingOfLastTwoSeats).Serialize serializer
+            let booking1 = (Row1Events.SeatsBooked firstBookingOfFirstTwoSeats).Serialize  serializer
+            let booking2 = (Row1Events.SeatsBooked secondBookingOfLastTwoSeats).Serialize serializer
             
             (storage :> IEventStore).AddEvents Row1Context.Row1.Version Row1Context.Row1.StorageName [booking1; booking2]
             let availableSeats = app.GetAllAvailableSeats() |> Result.get
@@ -85,39 +85,39 @@ let tests =
         testCase "cannot leave the only central 3 seat free - Error" <| fun _ ->
             let currentSeats = Row1.Zero
             let booking = { id = 1; seats = [1; 2; 4; 5] }
-            let reservedSeats = currentSeats.ReserveSeats booking
+            let reservedSeats = currentSeats.BookSeats booking
             Expect.isError reservedSeats "should be equal"
             
-        testCase "can leave the two central seats 2 and 3 free - Error" <| fun _ ->
+        testCase "can leave the two central seats 2 and 3 free - Ok" <| fun _ ->
             let currentSeats = Row1.Zero
             let booking = { id = 1; seats = [1; 4; 5] }
-            let reservedSeats = currentSeats.ReserveSeats booking
+            let reservedSeats = currentSeats.BookSeats booking
             Expect.isOk reservedSeats "should be equal"
 
         testCase "book a single seat from the first row - Ok" <| fun _ ->
             let booking = { id = 1; seats = [1] }
-            let row1WithOneSeatBooked = Row1.Zero.ReserveSeats booking |> Result.get
+            let row1WithOneSeatBooked = Row1.Zero.BookSeats booking |> Result.get
             let availableSeats = row1WithOneSeatBooked.GetAvailableSeats()
             Expect.equal availableSeats.Length 4 "should be equal"
 
         testCase "book a single seat from the second row - Ok" <| fun _ ->
             let booking = { id = 2; seats = [6] }
             let row2Context = RowContext(row2Seats)
-            let row2WithOneSeatBooked = row2Context.ReserveSeats booking |> Result.get
+            let row2WithOneSeatBooked = row2Context.BookSeats booking |> Result.get
             let availables = row2WithOneSeatBooked.GetAvailableSeats()
             Expect.equal availables.Length 4 "should be equal"
 
         testCase "book a seat that is already booked - Error" <| fun _ ->
             let booking = { id = 1; seats = [1] }
-            let row1WithOneSeatBooked = Row1.Zero.ReserveSeats booking |> Result.get
+            let row1WithOneSeatBooked = Row1.Zero.BookSeats booking |> Result.get
             Expect.isFalse (row1WithOneSeatBooked.IsAvailable 1) "should be equal"
             let newBooking = { id = 1; seats = [1] }
-            let reservedSeats' = row1WithOneSeatBooked.ReserveSeats newBooking 
+            let reservedSeats' = row1WithOneSeatBooked.BookSeats newBooking 
             Expect.isError reservedSeats' "should be equal"
 
         testCase "book five seats - Ok" <| fun _ ->
             let booking = { id = 1; seats = [1;2;3;4;5] }
-            let row1FullyBooked = Row1.Zero.ReserveSeats booking |> Result.get
+            let row1FullyBooked = Row1.Zero.BookSeats booking |> Result.get
             let availableSeats = row1FullyBooked.GetAvailableSeats()    
             Expect.equal availableSeats.Length 0 "should be equal"
     ]

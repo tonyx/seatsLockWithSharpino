@@ -6,11 +6,11 @@ open Sharpino.Definitions
 
 module Row2Events =
     type Row2Events =
-        | SeatsReserved of Seats.Booking
+        | SeatsBooked of Seats.Booking
             interface Event<Row2Context.Row2> with
                 member this.Process (x: Row2Context.Row2) =
                     match this with
-                    | SeatsReserved booking ->
+                    | SeatsBooked booking ->
                         x.ReserveSeats booking
         member this.Serialize(serializer: ISerializer) =
             this

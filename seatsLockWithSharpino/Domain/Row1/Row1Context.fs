@@ -26,9 +26,9 @@ module Row1Context =
         member this.IsAvailable (seatId: Seats.Id) =
             rowContext.IsAvailable seatId
 
-        member this.ReserveSeats (booking: Seats.Booking) =
+        member this.BookSeats (booking: Seats.Booking) =
             result {
-                let! rowContext' = rowContext.ReserveSeats booking
+                let! rowContext' = rowContext.BookSeats booking
                 return Row1(rowContext')
             }
 

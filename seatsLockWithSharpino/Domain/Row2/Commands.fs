@@ -9,11 +9,11 @@ open Row2
 
 module Row2Command =
     type Row2Command =
-        | ReserveSeats of Seats.Booking
+        | BookSeats of Seats.Booking
             interface Command<Row2Context.Row2, Row2Events.Row2Events > with
                 member this.Execute (x: Row2Context.Row2) =
                     match this with
-                    | ReserveSeats booking ->
+                    | BookSeats booking ->
                         x.ReserveSeats booking
-                        |> Result.map (fun ctx -> [ Row2Events.SeatsReserved booking ])
+                        |> Result.map (fun ctx -> [ Row2Events.SeatsBooked booking ])
                 member this.Undoer = None

@@ -27,7 +27,7 @@ module Row2Context =
 
         member this.ReserveSeats (booking: Seats.Booking) =
             result {
-                let! rowContext' = rowContext.ReserveSeats booking
+                let! rowContext' = rowContext.BookSeats booking
                 return Row2(rowContext')
             }
 

@@ -4,8 +4,8 @@ namespace seatsLockWithSharpino
 module Seats =
     type Id = int
     type SeatState =
-        | Reserved
-        | Available
+        | Booked
+        | Free
     type Seat =
         { id: Id
           State: SeatState 
