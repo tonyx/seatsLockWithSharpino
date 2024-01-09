@@ -132,7 +132,7 @@ let apiTests =
             let storage = MemoryStorage()
             StateCache<Row1>.Instance.Clear()
             StateCache<Row2Context.Row2>.Instance.Clear()
-            let app = new App(storage)
+            let app = App(storage)
 
             let booking = { id = 1; seats = [3;7] }
             let booked = app.BookSeats booking 
@@ -148,7 +148,7 @@ let apiTests =
             StateCache<Row1>.Instance.Clear()
             StateCache<Row2Context.Row2>.Instance.Clear()
 
-            let app = new App(storage)
+            let app = App(storage)
             let booking = { id = 1; seats = [1;2;3;4;5] }
             let booking1 = { id = 1; seats = [1;2;3;4;5] }
             let booking2 = { id = 2; seats = [] }
@@ -162,7 +162,7 @@ let apiTests =
             StateCache<Row1>.Instance.Clear()
             StateCache<Row2Context.Row2>.Instance.Clear()
 
-            let app = new App(storage)
+            let app = App(storage)
             let booking1 = { id = 1; seats = [1;2;3;4;5] }
             let booked = app.BookSeats booking1 
             Expect.isOk booked "should be equal"
@@ -174,7 +174,7 @@ let apiTests =
             let storage = MemoryStorage()
             StateCache<Row1>.Instance.Clear()
             StateCache<Row2Context.Row2>.Instance.Clear()
-            let app = new App(storage)
+            let app = App(storage)
             let booking2 = { id = 2; seats = [6;7;8;9;10] }
             let booked = app.BookSeats booking2 
             Expect.isOk booked "should be equal"
@@ -186,7 +186,7 @@ let apiTests =
             let storage = MemoryStorage()
             StateCache<Row1>.Instance.Clear()
             StateCache<Row2Context.Row2>.Instance.Clear()
-            let app = new App(storage)
+            let app = App(storage)
             let booking2 = { id = 2; seats = [6] }
             let booked = app.BookSeats booking2 
             Expect.isOk booked "should be equal"
@@ -197,7 +197,7 @@ let apiTests =
             let storage = MemoryStorage()
             StateCache<Row1>.Instance.Clear()
             StateCache<Row2Context.Row2>.Instance.Clear()
-            let app = new App(storage)
+            let app = App(storage)
             let booking = { id = 2; seats = [1] }
             let booked = app.BookSeats booking 
             Expect.isOk booked "should be equal"
@@ -208,7 +208,7 @@ let apiTests =
             let storage = MemoryStorage()
             StateCache<Row1>.Instance.Clear()
             StateCache<Row2Context.Row2>.Instance.Clear()
-            let app = new App(storage)
+            let app = App(storage)
             let booking = { id = 2; seats = [6;7] }
             let booked = app.BookSeats booking 
             Expect.isOk booked "should be equal"
@@ -220,7 +220,7 @@ let apiTests =
             let storage = MemoryStorage()
             StateCache<Row1>.Instance.Clear()
             StateCache<Row2Context.Row2>.Instance.Clear()
-            let app = new App(storage)
+            let app = App(storage)
             let booking  = { id = 3; seats = [6;7;8;9;10] }
             let booked = app.BookSeats booking
             Expect.isOk booked "should be equal"
@@ -230,7 +230,7 @@ let apiTests =
             StateCache<Row1>.Instance.Clear()
             StateCache<Row2Context.Row2>.Instance.Clear()
 
-            let app = new App(storage)
+            let app = App(storage)
             let availableSeats = app.GetAllAvailableSeats() |> Result.get
             Expect.equal availableSeats.Length 10 "should be equal"
 
@@ -239,7 +239,7 @@ let apiTests =
             StateCache<Row1>.Instance.Clear()
             StateCache<Row2Context.Row2>.Instance.Clear()
 
-            let app = new App(storage)
+            let app = App(storage)
             let row1FreeSeats = app.GetAllAvailableSeats() |> Result.get
             Expect.equal row1FreeSeats.Length 10 "should be equal"
             let booking =  { id = 1; seats = [1;2;3;4;5] }
