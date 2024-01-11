@@ -44,7 +44,6 @@ let hackingEventInStorageTest =
             let invalidBookingViolatesInvariant = { id = 1; seats = [1; 2; 4; 5] }
             
             let bookingEvent = Row1Events.SeatsBooked invalidBookingViolatesInvariant
-            // let serializedEvent = bookingEvent |> serializer.Serialize
             let serializedEvent = bookingEvent.Serialize serializer 
             (storage :> IEventStore).AddEvents Row1Context.Row1.Version Row1Context.Row1.StorageName [serializedEvent]
             let availableSeats = app.GetAllAvailableSeats() |> Result.get
@@ -153,7 +152,6 @@ let apiTests =
             let booking1 = { id = 1; seats = [1;2;3;4;5] }
             let booking2 = { id = 2; seats = [] }
             let booked = app.BookSeats booking
-            // let booked = app.BookSeatsTwoRows booking1 booking2 
             Expect.isOk booked "should be equal"
 
         testCase "book all seats on row1 - Ok" <| fun _ ->
@@ -258,7 +256,7 @@ let apiTests =
             StateCache<Row1>.Instance.Clear()
             StateCache<Row2Context.Row2>.Instance.Clear()
 
-            let app = new App(storage)
+            let app = App(storage)
             let booking1 = { id = 1; seats = [1;2;3;4;5] }
             let booked = app.BookSeats booking1
             Expect.isOk booked "should be equal"
